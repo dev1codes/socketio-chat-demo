@@ -1,0 +1,13 @@
+{
+  "name": "socketio-chat-demo",
+  "version": "1.0.0",
+  "description": "Minimal Socket.IO chat demo for teaching beginners",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}

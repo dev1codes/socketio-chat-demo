@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Socket.IO Chat Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="join-screen">
+    <h1>Socket.IO Chat Demo</h1>
+    <input id="username-input" type="text" placeholder="Enter your name" autocomplete="off" />
+    <button id="join-btn">Join chat</button>
+  </div>
+
+  <div id="chat-screen" class="hidden">
+    <h1>Socket.IO Chat Demo</h1>
+    <ul id="messages"></ul>
+    <form id="chat-form">
+      <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <!-- Served automatically by the socket.io server, not a file in public/ -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
