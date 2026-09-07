@@ -31,6 +31,7 @@ const onlineUsers = new Map();
 // open devtools and call socket.emit directly, skipping the browser code.
 const MIN_MESSAGE_INTERVAL_MS = 400;
 const MAX_MESSAGE_LENGTH = 500;
+const MAX_USERNAME_LENGTH = 30;
 
 function broadcastUserList() {
   io.emit('user list', Array.from(onlineUsers.values()));
@@ -40,19 +41,35 @@ io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
   socket.on('join', (username) => {
-    socket.data.username = username;
-    onlineUsers.set(socket.id, username);
+    // The client already blocks an empty name, but that's only a UI nicety —
+    // validate again here so a devtools-emitted 'join' can't sneak an empty
+    // or blank username past the check and end up posting as nothing.
+    if (typeof username !== 'string') return;
+    const trimmed = username.trim().slice(0, MAX_USERNAME_LENGTH);
+    if (!trimmed) return;
+
+    socket.data.username = trimmed;
+    onlineUsers.set(socket.id, trimmed);
 
     // Sent to this socket only — everyone else already has this history,
     // it's just the new arrival who needs catching up.
     socket.emit('history', messageHistory);
 
-    socket.broadcast.emit('system', `${username} joined the chat`);
+    socket.broadcast.emit('system', `${trimmed} joined the chat`);
     broadcastUserList();
   });
 
   socket.on('chat message', (text) => {
     if (typeof text !== 'string') return;
+
+    // No anonymous posting: a socket that skipped 'join' (or got disconnected
+    // and hasn't rejoined) has no username on record, so reject the message
+    // outright instead of ever falling back to a generic "Anonymous" sender.
+    const username = socket.data.username;
+    if (!username) {
+      socket.emit('system', 'You need to enter a name and join before sending messages.');
+      return;
+    }
 
     const now = Date.now();
     const elapsed = now - (socket.data.lastMessageAt || 0);
@@ -65,7 +82,6 @@ io.on('connection', (socket) => {
     const trimmed = text.trim().slice(0, MAX_MESSAGE_LENGTH);
     if (!trimmed) return;
 
-    const username = socket.data.username || 'Anonymous';
     const cleanText = filter.clean(trimmed);
 
     const message = { username, text: cleanText };

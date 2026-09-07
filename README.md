@@ -69,6 +69,7 @@ Incoming messages are also run through a profanity filter (the `bad-words` packa
 Two more guardrails live in the same `chat message` handler:
 - **Rate limiting** — each socket tracks `lastMessageAt`; a message sent less than `MIN_MESSAGE_INTERVAL_MS` (400ms) after the last one is rejected with a `rate limited` event back to the sender only, not broadcast. This has to be server-side: a client could always call `socket.emit` directly from devtools and skip any button-disabling in the browser code.
 - **Max message length** — anything over `MAX_MESSAGE_LENGTH` (500 chars) gets truncated before it's stored or broadcast. The `maxlength="500"` attribute on the input in `index.html` is just a UX nicety; the server enforcing it again is what actually matters.
+- **No anonymous posting** — `chat message` checks `socket.data.username` and rejects the message outright if it's missing (e.g. `join` was skipped, sent blank, or never happened because the socket disconnected and hasn't rejoined). The client's UI already prevents this in normal use — hiding the chat form until you've joined, and showing it again on disconnect — but the server re-checks anyway, since a client could always call `socket.emit('chat message', ...)` directly from devtools and skip the UI entirely. **The rule to teach here: never trust the client — any check that matters has to also happen on the server.**
 
 ## Next steps for students
 
