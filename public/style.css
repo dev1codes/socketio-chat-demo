@@ -187,6 +187,12 @@ button:hover {
   50% { transform: scale(1.3); opacity: 0.6; }
 }
 
+.dot.offline {
+  background: var(--dim);
+  box-shadow: none;
+  animation: none;
+}
+
 .user-list-bar {
   display: flex;
   align-items: center;

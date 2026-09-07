@@ -10,8 +10,11 @@ const messages = document.getElementById('messages');
 const chatForm = document.getElementById('chat-form');
 const messageInput = document.getElementById('message-input');
 const userList = document.getElementById('user-list');
+const connectionDot = document.getElementById('connection-dot');
+const connectionStatus = document.getElementById('connection-status');
 
 let username = '';
+let hasJoined = false;
 
 joinBtn.addEventListener('click', () => {
   username = usernameInput.value.trim();
@@ -20,9 +23,30 @@ joinBtn.addEventListener('click', () => {
   // Tells the server who we are. Matches socket.on('join', ...) in server.js.
   socket.emit('join', username);
 
+  hasJoined = true;
   joinScreen.classList.add('hidden');
   chatScreen.classList.remove('hidden');
   messageInput.focus();
+});
+
+socket.on('connect', () => {
+  connectionDot.classList.remove('offline');
+  connectionStatus.textContent = 'Connected';
+});
+
+// Fires on a dropped connection (server restart, network blip, etc). The
+// server has already forgotten this socket's username by this point, so
+// send whoever it was back to the join screen instead of leaving them
+// staring at a "connected" chat that no longer actually is.
+socket.on('disconnect', () => {
+  connectionDot.classList.add('offline');
+  connectionStatus.textContent = 'Disconnected';
+
+  if (hasJoined) {
+    hasJoined = false;
+    chatScreen.classList.add('hidden');
+    joinScreen.classList.remove('hidden');
+  }
 });
 
 const sendBtn = chatForm.querySelector('button');

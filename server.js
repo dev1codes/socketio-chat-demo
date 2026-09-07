@@ -8,7 +8,12 @@ const server = http.createServer(app);
 const io = new Server(server);
 const filter = new Filter();
 
-app.use(express.static('public'));
+// Tell browsers (and any carrier/proxy cache in between) to never reuse a
+// cached copy of these files — otherwise a phone can keep showing an old
+// version of the CSS/JS after a redeploy long after a laptop has the update.
+app.use(express.static('public', {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
+}));
 
 // In-memory only — the free tier's filesystem is ephemeral and the process
 // itself gets recycled after inactivity, so this resets on every restart.
