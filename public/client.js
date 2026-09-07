@@ -24,7 +24,7 @@ joinBtn.addEventListener('click', () => {
   socket.emit('join', username);
 
   hasJoined = true;
-  joinScreen.classList.add('hidden');
+  joinScreen.remove();
   chatScreen.classList.remove('hidden');
   messageInput.focus();
 });
@@ -45,7 +45,9 @@ socket.on('disconnect', () => {
   if (hasJoined) {
     hasJoined = false;
     chatScreen.classList.add('hidden');
-    joinScreen.classList.remove('hidden');
+    // joinScreen was fully removed from the DOM on join, not just hidden —
+    // put it back in its original spot, right before the chat screen.
+    chatScreen.before(joinScreen);
   }
 });
 
