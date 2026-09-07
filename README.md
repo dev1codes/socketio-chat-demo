@@ -57,9 +57,22 @@ Everything worth understanding lives in two files:
 
 - **[public/client.js](public/client.js)** — the browser side of the same three events, so you can see both ends of each conversation side by side.
 
+The server also keeps two small pieces of state in memory, which are worth pointing out as the next level up from the basic events:
+
+- `onlineUsers` (a `Map` of `socket.id -> username`) — rebuilt on every `join`/`disconnect` and broadcast as a `user list` event, driving the online-users bar in the UI.
+- `messageHistory` (an array of the last 50 messages) — sent only to the newly joined socket (`socket.emit('history', ...)`, not a broadcast) so latecomers see recent context.
+
+Both live only in the Node process's memory — **not a database**. That's an important distinction for students: this state resets whenever the server restarts (including Render's free tier spinning the service down after inactivity). It's enough for "recent context in a live session," not for permanent history — a good jumping-off point for discussing why real apps need a database.
+
+Incoming messages are also run through a profanity filter (the `bad-words` package) server-side, before broadcasting — filtering client-side wouldn't work here since anyone could disable their own JavaScript and send unfiltered text straight to the server.
+
+Two more guardrails live in the same `chat message` handler:
+- **Rate limiting** — each socket tracks `lastMessageAt`; a message sent less than `MIN_MESSAGE_INTERVAL_MS` (400ms) after the last one is rejected with a `rate limited` event back to the sender only, not broadcast. This has to be server-side: a client could always call `socket.emit` directly from devtools and skip any button-disabling in the browser code.
+- **Max message length** — anything over `MAX_MESSAGE_LENGTH` (500 chars) gets truncated before it's stored or broadcast. The `maxlength="500"` attribute on the input in `index.html` is just a UX nicety; the server enforcing it again is what actually matters.
+
 ## Next steps for students
 
 Once this makes sense, good follow-up exercises:
 - Add a typing indicator (`socket.emit('typing')` on keypress).
-- Show a list of currently online users.
+- Make chat history actually persistent (survive a server restart) by swapping the in-memory array for a real database.
 - Turn the single shared room into private 1-on-1 direct messages by tracking each user's `socket.id` and using `io.to(socketId).emit(...)`.

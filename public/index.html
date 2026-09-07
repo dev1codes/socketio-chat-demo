@@ -28,9 +28,13 @@
         <p class="prompt"><span class="prompt-user">dmhs@chat</span><span class="prompt-dim">:~$</span></p>
         <span class="status-chip"><span class="dot"></span>Connected</span>
       </div>
+      <div class="user-list-bar">
+        <span class="user-list-label">online</span>
+        <ul id="user-list" class="user-list"></ul>
+      </div>
       <ul id="messages"></ul>
       <form id="chat-form">
-        <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" />
+        <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" maxlength="500" />
         <button type="submit">Send</button>
       </form>
     </div>
