@@ -3,23 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <title>Socket.IO Chat Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div id="join-screen">
-    <h1>Socket.IO Chat Demo</h1>
-    <input id="username-input" type="text" placeholder="Enter your name" autocomplete="off" />
-    <button id="join-btn">Join chat</button>
+  <div class="scanline"></div>
+
+  <div id="join-screen" class="screen">
+    <div class="card join-card">
+      <p class="kicker">socket.io demo</p>
+      <p class="prompt"><span class="prompt-user">dmhs@chat</span><span class="prompt-dim">:~$</span> <span class="cursor">_</span></p>
+      <h1>Join the chat</h1>
+      <input id="username-input" type="text" placeholder="Enter your name" autocomplete="off" />
+      <button id="join-btn">Join chat</button>
+    </div>
   </div>
 
-  <div id="chat-screen" class="hidden">
-    <h1>Socket.IO Chat Demo</h1>
-    <ul id="messages"></ul>
-    <form id="chat-form">
-      <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" />
-      <button type="submit">Send</button>
-    </form>
+  <div id="chat-screen" class="screen hidden">
+    <div class="card chat-card">
+      <div class="chat-header">
+        <p class="prompt"><span class="prompt-user">dmhs@chat</span><span class="prompt-dim">:~$</span></p>
+        <span class="status-chip"><span class="dot"></span>Connected</span>
+      </div>
+      <ul id="messages"></ul>
+      <form id="chat-form">
+        <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+    </div>
   </div>
 
   <!-- Served automatically by the socket.io server, not a file in public/ -->

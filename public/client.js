@@ -37,17 +37,25 @@ chatForm.addEventListener('submit', (event) => {
 // Fires when the server calls io.emit('chat message', ...) — that includes
 // messages we sent ourselves, so we don't render our own text locally above.
 socket.on('chat message', ({ username: sender, text }) => {
-  addMessage(`${sender}: ${text}`);
+  const li = document.createElement('li');
+  if (sender === username) li.classList.add('own');
+
+  const senderEl = document.createElement('span');
+  senderEl.className = 'sender';
+  senderEl.textContent = sender;
+
+  li.append(senderEl, text);
+  appendMessage(li);
 });
 
 socket.on('system', (text) => {
-  addMessage(text, true);
+  const li = document.createElement('li');
+  li.className = 'system';
+  li.textContent = text;
+  appendMessage(li);
 });
 
-function addMessage(text, isSystem = false) {
-  const li = document.createElement('li');
-  li.textContent = text;
-  if (isSystem) li.classList.add('system');
+function appendMessage(li) {
   messages.appendChild(li);
   messages.scrollTop = messages.scrollHeight;
 }

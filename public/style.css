@@ -1,56 +1,229 @@
+:root {
+  --bg: #090b10;
+  --bg-2: #0d0f16;
+  --fg: #d7dee8;
+  --dim: #6b7685;
+  --accent: #4dffb4;
+  --accent-2: #5ec8ff;
+  --line: rgba(255, 255, 255, 0.08);
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  max-width: 480px;
-  margin: 40px auto;
-  padding: 0 16px;
-  color: #1a1a1a;
-}
-
-h1 {
-  font-size: 1.25rem;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
 
 .hidden {
   display: none;
 }
 
-#join-screen input,
-#chat-form input {
-  padding: 8px;
-  font-size: 1rem;
-  width: 70%;
+/* Whole-page texture, matches the landing page's terminal feel */
+.scanline {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
 }
 
-#join-screen button,
-#chat-form button {
-  padding: 8px 16px;
-  font-size: 1rem;
-}
-
-#chat-form {
+.screen {
+  width: 100%;
   display: flex;
+  justify-content: center;
+}
+
+.card {
+  background: rgba(9, 11, 16, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  width: 100%;
+}
+
+.join-card {
+  max-width: 380px;
+  padding: 28px;
+}
+
+.chat-card {
+  max-width: 480px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kicker {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  margin: 0 0 12px;
+}
+
+.prompt {
+  margin: 0 0 20px;
+  font-size: 13px;
+}
+
+.prompt-user {
+  color: var(--accent-2);
+}
+
+.prompt-dim {
+  color: var(--dim);
+}
+
+.cursor {
+  display: inline-block;
+  color: var(--accent);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: var(--fg);
+}
+
+input {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+input::placeholder {
+  color: var(--dim);
+}
+
+input:focus {
+  border-color: var(--accent-2);
+}
+
+button {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+#join-screen input {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+#join-screen button {
+  width: 100%;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  font-size: 12px;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
 }
 
 #messages {
   list-style: none;
-  margin: 0 0 12px;
-  padding: 8px;
-  height: 320px;
+  margin: 0;
+  padding: 16px 20px;
+  height: 360px;
   overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  font-size: 14px;
 }
 
 #messages li {
-  padding: 4px 0;
+  padding: 5px 0;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+#messages li .sender {
+  color: var(--accent-2);
+  margin-right: 6px;
+}
+
+#messages li.own .sender {
+  color: var(--accent);
 }
 
 #messages li.system {
-  color: #888;
+  color: var(--dim);
   font-style: italic;
+  font-size: 13px;
+}
+
+#chat-form {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--line);
+}
+
+#chat-form input {
+  flex: 1;
 }
