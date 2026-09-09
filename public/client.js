@@ -5,7 +5,9 @@ const socket = io();
 const joinScreen = document.getElementById('join-screen');
 const chatScreen = document.getElementById('chat-screen');
 const usernameInput = document.getElementById('username-input');
+const classCodeInput = document.getElementById('class-code-input');
 const joinBtn = document.getElementById('join-btn');
+const joinError = document.getElementById('join-error');
 const messages = document.getElementById('messages');
 const chatForm = document.getElementById('chat-form');
 const messageInput = document.getElementById('message-input');
@@ -14,19 +16,33 @@ const connectionDot = document.getElementById('connection-dot');
 const connectionStatus = document.getElementById('connection-status');
 
 let username = '';
+let pendingUsername = '';
 let hasJoined = false;
 
 joinBtn.addEventListener('click', () => {
-  username = usernameInput.value.trim();
-  if (!username) return;
+  const name = usernameInput.value.trim();
+  const code = classCodeInput.value.trim();
+  if (!name || !code) return;
 
-  // Tells the server who we are. Matches socket.on('join', ...) in server.js.
-  socket.emit('join', username);
+  // We don't know yet whether the code is right, so don't switch screens
+  // here — wait for the server's 'join success' or 'join error' response.
+  // Matches socket.on('join', ...) in server.js.
+  pendingUsername = name;
+  joinError.textContent = '';
+  socket.emit('join', { username: name, code });
+});
 
+// The server only sends this after the class code checks out.
+socket.on('join success', () => {
+  username = pendingUsername;
   hasJoined = true;
   joinScreen.remove();
   chatScreen.classList.remove('hidden');
   messageInput.focus();
+});
+
+socket.on('join error', (message) => {
+  joinError.textContent = message;
 });
 
 socket.on('connect', () => {

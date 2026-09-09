@@ -161,6 +161,13 @@ button:hover {
   width: 100%;
 }
 
+.join-error {
+  min-height: 16px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #ff6b6b;
+}
+
 .chat-header {
   display: flex;
   align-items: center;

@@ -1,3 +1,5 @@
+require('dotenv').config({ quiet: true });
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -7,6 +9,18 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const filter = new Filter();
+
+// Fail loudly at startup rather than silently letting anyone join — a
+// missing passcode almost certainly means someone forgot to set it, not
+// that the room is meant to be open to the internet.
+const CLASS_PASSCODE = process.env.CLASS_PASSCODE;
+if (!CLASS_PASSCODE) {
+  console.error(
+    'CLASS_PASSCODE is not set. Create a .env file locally (see .env.example) ' +
+    'or set CLASS_PASSCODE as an environment variable on Render before starting the server.'
+  );
+  process.exit(1);
+}
 
 // Tell browsers (and any carrier/proxy cache in between) to never reuse a
 // cached copy of these files — otherwise a phone can keep showing an old
@@ -40,16 +54,30 @@ function broadcastUserList() {
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
-  socket.on('join', (username) => {
+  socket.on('join', ({ username, code } = {}) => {
+    // Gate the room behind a shared class passcode before anything else —
+    // wrong code means no username gets set, no history is sent, and the
+    // client stays on the join screen with an error instead of ever
+    // reaching the chat.
+    if (typeof code !== 'string' || code.trim().toLowerCase() !== CLASS_PASSCODE.toLowerCase()) {
+      socket.emit('join error', 'Incorrect class code.');
+      return;
+    }
+
     // The client already blocks an empty name, but that's only a UI nicety —
     // validate again here so a devtools-emitted 'join' can't sneak an empty
     // or blank username past the check and end up posting as nothing.
     if (typeof username !== 'string') return;
     const trimmed = username.trim().slice(0, MAX_USERNAME_LENGTH);
-    if (!trimmed) return;
+    if (!trimmed) {
+      socket.emit('join error', 'Enter a name to join.');
+      return;
+    }
 
     socket.data.username = trimmed;
     onlineUsers.set(socket.id, trimmed);
+
+    socket.emit('join success');
 
     // Sent to this socket only — everyone else already has this history,
     // it's just the new arrival who needs catching up.

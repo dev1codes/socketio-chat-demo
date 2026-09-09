@@ -18,8 +18,10 @@
       <p class="kicker">socket.io demo</p>
       <p class="prompt"><span class="prompt-user">dmhs@chat</span><span class="prompt-dim">:~$</span> <span class="cursor">_</span></p>
       <h1>Join the chat</h1>
-      <input id="username-input" type="text" placeholder="Enter your name" autocomplete="off" />
+      <input id="username-input" type="text" placeholder="Enter your name" autocomplete="off" maxlength="30" />
+      <input id="class-code-input" type="text" placeholder="Class code" autocomplete="off" />
       <button id="join-btn">Join chat</button>
+      <p id="join-error" class="join-error"></p>
     </div>
   </div>
 

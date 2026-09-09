@@ -6,10 +6,21 @@ A minimal chat app for learning how [Socket.IO](https://socket.io) works. Socket
 
 ```bash
 npm install
+cp .env.example .env   # then edit .env and set your own CLASS_PASSCODE
 npm start
 ```
 
-Then open `http://localhost:3000` in two separate browser tabs (or windows) and chat with yourself — each tab is treated as a separate connected client.
+The server won't start without `CLASS_PASSCODE` set — see [Class passcode](#class-passcode) below.
+
+Then open `http://localhost:3000` in two separate browser tabs (or windows) and chat with yourself — each tab is treated as a separate connected client. Enter the passcode from your `.env` file along with a name to join.
+
+## Class passcode
+
+Anyone joining has to enter a shared passcode along with their name — this keeps random strangers on the internet out of the room without needing real per-person accounts. It's a low-effort gate, not strong security: it's one secret shared by everyone, so treat it more like "the door is closed" than "only verified individuals can enter." (See the README's earlier discussion — a real identity check would mean something like Google OAuth restricted to a school email domain, which is a much bigger addition.)
+
+- **Local development:** set `CLASS_PASSCODE` in a `.env` file (copy `.env.example` to `.env` and edit it — `.env` is gitignored, so it never gets committed).
+- **On Render:** set `CLASS_PASSCODE` as an Environment Variable in the service's settings (see [deploying-to-render.md](deploying-to-render.md)) — don't put the real passcode in the repo.
+- Change it any time by updating the env var and restarting the server — no code change needed.
 
 ## Connecting over a network
 
@@ -70,6 +81,7 @@ Two more guardrails live in the same `chat message` handler:
 - **Rate limiting** — each socket tracks `lastMessageAt`; a message sent less than `MIN_MESSAGE_INTERVAL_MS` (400ms) after the last one is rejected with a `rate limited` event back to the sender only, not broadcast. This has to be server-side: a client could always call `socket.emit` directly from devtools and skip any button-disabling in the browser code.
 - **Max message length** — anything over `MAX_MESSAGE_LENGTH` (500 chars) gets truncated before it's stored or broadcast. The `maxlength="500"` attribute on the input in `index.html` is just a UX nicety; the server enforcing it again is what actually matters.
 - **No anonymous posting** — `chat message` checks `socket.data.username` and rejects the message outright if it's missing (e.g. `join` was skipped, sent blank, or never happened because the socket disconnected and hasn't rejoined). The client's UI already prevents this in normal use — hiding the chat form until you've joined, and showing it again on disconnect — but the server re-checks anyway, since a client could always call `socket.emit('chat message', ...)` directly from devtools and skip the UI entirely. **The rule to teach here: never trust the client — any check that matters has to also happen on the server.**
+- **Class passcode** — `join` now takes `{ username, code }` instead of just a name, and rejects the whole join (with a `join error` event, no `history`, no `join success`) if `code` doesn't match `CLASS_PASSCODE`. Notice the client no longer switches to the chat screen the moment you click "Join" — it waits for the server's `join success` event first, since the join might fail now. That's a good example of why you sometimes can't update the UI optimistically: the server has to be the one to decide whether the action actually succeeded.
 
 ## Next steps for students
 
